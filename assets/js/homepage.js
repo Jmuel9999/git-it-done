@@ -9,11 +9,23 @@ var getUserRepos = function(user) {
     var apiUrl = "https://api.github.com/users/" + user + "/repos";//ex: "facebook" for 'user' leads to facebook repos
 
     //make a request to the url and format to JSON
-    fetch(apiUrl).then(function(response) {
-        response.json().then(function(data) {
-            displayRepos(data, user);
-            console.log(data);
-        });
+    fetch(apiUrl)
+        .then(function(response) {
+        //request was successful
+        if (response.ok) {//if response IS TRUE
+            console.log(response);
+            response.json().then(function(data) {
+                console.log(data);
+                displayRepos(data, user);
+           });
+        } else {
+            alert("Error: " + response.statusText);
+        }
+    })
+    .catch(function(error){
+        //notice this ".catch()" getting chained onto the end of the ".then()" method
+        //this is the Fetch API's way of handling network errors
+        alert("Unable to connect to Github");
     });
 };
 
@@ -32,11 +44,17 @@ var formSubmitHandler = function(event) {
     };
 
 var displayRepos = function (repos, searchTerm) {//this function accepts both the array of repository data and the term we searched for as parameters
+    //check if API returned any repos
+    //we put this above "fetch" function because we want this to run first
+    if(repos.length === 0) {//IF there are NO repos...then the repoContainerEl will NOT be created and display that message
+        repoContainerEl.textContent = "No repositories found.";
+        return;
+    }
     //clear old content
     repoContainerEl.textContent = "";
     repoSearchTerm.textContent = searchTerm;
-    console.log(repos);
-    console.log(searchTerm);
+    //console.log(repos);
+    //console.log(searchTerm);
     // loop over repos
     for (var i = 0; i < repos.length; i++) {
         // format repo name
